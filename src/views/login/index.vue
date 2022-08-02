@@ -80,8 +80,8 @@ export default {
   watch: {},
   methods: {
     async login() {
-      this.isLoading = false
       try {
+        this.isLoading = true
         // 数据成功后获取请求
         await this.$refs.loginForm.validate()
         console.log('成功')
