@@ -8,3 +8,17 @@ export function login(data) {
     })
 
 }
+// 用户信息
+export function getUserInfoApi() {
+    return request({
+        url: '/sys/profile',
+        method: 'post'
+    })
+}
+// 用户Id
+export function getUserDetail(id) {
+    return request({
+        url: "/sys/user/" + id,
+
+    })
+}

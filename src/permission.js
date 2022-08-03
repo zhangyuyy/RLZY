@@ -8,9 +8,13 @@ import store from "@/store"
 const whiteList = ['/login', '/404']
 router.beforeEach((to, from, next) => {
     const token = store.state.user.token
+    if (!store.state.user.userInfo.id) {
+        store.dispatch('user/getUserInfo')
+    }
     if (token) {
         //1. 登陆
         // 是否进入登陆页面
+        store.dispatch('user/getUserInfo')
         if (to.path === '/login') {
             // 1.1 是 跳到首页
             next('/')

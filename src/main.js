@@ -14,6 +14,7 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission' // permission control
+import * as directives from "@/directives"
 
 // mock 存放假数据
 if (process.env.NODE_ENV === 'production') {
@@ -27,6 +28,14 @@ Vue.use(ElementUI, { locale })
 // Vue.use(ElementUI)
 
 Vue.config.productionTip = false
+// 参数一 自定义指令的v-
+// 参数二 是配置对象
+for (let key in directives) {
+  Vue.directive(key, directives[key])
+}
+
+
+
 
 new Vue({
   el: '#app',
