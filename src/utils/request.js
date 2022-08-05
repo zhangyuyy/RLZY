@@ -11,6 +11,7 @@ const tokenTimeout = () => {
     const timeout = 2 * 60 * 60 * 1000
     return currentTime - tokenTime > timeout
 }
+
 const service = axios.create({
     baseURL: process.env.VUE_APP_BASE_API, // 设置axios请求的基础的基础地址
     timeout: 5000,
@@ -23,6 +24,7 @@ service.interceptors.request.use(
             if (tokenTimeout()) {
                 await store.dispatch('user/logout')
                 router.push('/login')
+               
                 return Promise.reject(new Error('登陆过期'))
             } else {
                 config.headers.Authorization = `Bearer ${token}`

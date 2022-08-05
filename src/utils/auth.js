@@ -17,5 +17,5 @@ export function setTokenTime() {
   Cookies.set('tokenTime', Date.now())
 }
 export function getTokenTime() {
-  Cookies.get('tokenTime')
+  return Cookies.get('tokenTime')
 }
