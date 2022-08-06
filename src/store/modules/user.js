@@ -1,55 +1,37 @@
-import { login, getUserInfoApi, getUserDetail } from '@/api/user'
+import { getUserDetail, getUserInfoApi, login } from '@/api/user.js'
 import { setTokenTime } from '@/utils/auth'
 export default {
   namespaced: true,
   state: {
-    // 登陆页面
     token: '',
-    // 获取用户信息
-    userInfo: {}
+    userInfo: {},
   },
   mutations: {
-    // 登陆页面
     setToken(state, payload) {
       state.token = payload
-
     },
-    // 获取用户信息
     setUserInfo(state, payload) {
       state.userInfo = payload
-      console.log(payload);
-
-    }
-
+    },
   },
   actions: {
-    // 登陆页面
+    // 登录获取token
     async getToken(context, payload) {
-      console.log(payload);
+      // 发送请求得来的
       const res = await login(payload)
-      // console.log(res);
-
       context.commit('setToken', res)
       setTokenTime()
-
     },
     // 获取用户信息
     async getUserInfo(context) {
       const userBaseInfo = await getUserInfoApi()
       const userInfo = await getUserDetail(userBaseInfo.userId)
-      console.log(userBaseInfo);
       context.commit('setUserInfo', { ...userBaseInfo, ...userInfo })
-      // setTimeout(() => {
-      //   const res = { name: 'zhangyu' }
-      //   context.commit('setUserInfo', res)
-      // }, 1000);
     },
+    // 退出
     logout(context) {
-      context.commit("setToken", '')
-      context.commit('setUserInfo', '')
-
-    }
-
+      context.commit('setToken', '')
+      context.commit('setUserInfo', {})
+    },
   },
-
 }

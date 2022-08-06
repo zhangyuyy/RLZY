@@ -11,9 +11,10 @@
     <div class="main-container">
       <!-- 头部 -->
       <div :class="{ 'fixed-header': fixedHeader }">
+        <!-- 头部navbar组件 -->
         <navbar />
       </div>
-      <!-- 子路由占位 -->
+      <!-- 肯定是子路由占位 -->
       <app-main />
     </div>
   </div>
@@ -28,7 +29,7 @@ export default {
   components: {
     Navbar,
     Sidebar,
-    AppMain
+    AppMain,
   },
   mixins: [ResizeMixin],
   computed: {
@@ -46,15 +47,15 @@ export default {
         hideSidebar: !this.sidebar.opened,
         openSidebar: this.sidebar.opened,
         withoutAnimation: this.sidebar.withoutAnimation,
-        mobile: this.device === 'mobile'
+        mobile: this.device === 'mobile',
       }
-    }
+    },
   },
   methods: {
     handleClickOutside() {
       this.$store.dispatch('app/closeSideBar', { withoutAnimation: false })
-    }
-  }
+    },
+  },
 }
 </script>
 
