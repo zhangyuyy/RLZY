@@ -6,49 +6,65 @@
         <treeTools
           :isRoot="true"
           :treeNode="{ name: '传值教育', manager: '负责人' }"
+          @add="showAddDept"
         ></treeTools>
         <!-- 树形结构 -->
-        <el-tree
-          :data="departs"
-          :props="defaultProps"
-          @node-click="handleNodeClick"
-          default-expand-all
-        >
+        <el-tree :data="departs" :props="defaultProps" default-expand-all>
           <template v-slot="{ data }">
-            <treeTools :treeNode="data"> </treeTools>
+            <treeTools
+              @add="showAddDept"
+              :treeNode="data"
+              @remove="loadDepts"
+            >
+            </treeTools>
           </template>
         </el-tree>
       </el-card>
     </div>
+    <!-- 传入父项子弹框 -->
+    <addDept @add-success='loadDepts' :visible.sync="dialogVisible" :currentNode="currentNode"></addDept>
   </div>
 </template>
 
 <script>
 import treeTools from './components/tree-tools.vue'
+import { getDepartApi } from '@/api/departments'
+import { transListToTree } from '@/utils'
+import addDept from './components/add-dept.vue'
 export default {
   data() {
     return {
-      departs: [
-        {
-          name: '总裁办',
-          manager: '曹操',
-          children: [{ name: '董事会', manager: '曹丕' }]
-        },
-        { name: '行政部', manager: '刘备' },
-        { name: '人事部', manager: '孙权' }
-      ],
+      departs: [],
       defaultProps: {
         label: 'name' // 表示 从这个属性显示内容
-      }
+      },
+      dialogVisible: false,
+      currentNode:{}
     }
   },
   components: {
-    treeTools
+    treeTools,
+    addDept
   },
 
-  created() {},
+  created() {
+    this.loadDepts()
+  },
 
-  methods: {}
+  methods: {
+    // 调用组织架构接口
+    async loadDepts() {
+      const res = await getDepartApi()
+      // console.log(res)
+      this.departs = transListToTree(res.depts, '')
+    },
+    // tree-toosl像父组件传值
+  showAddDept(val){
+      this.dialogVisible = true
+      this.currentNode=val
+
+    }
+  }
 }
 </script>
 
