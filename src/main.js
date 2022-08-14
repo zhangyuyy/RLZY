@@ -16,8 +16,22 @@ import router from './router'
 import '@/icons' // icon
 import '@/permission' // permission control
 import * as directives from '@/directives'
+// 处理时间
+import * as filters from '@/filters'
 
-console.log(directives)
+for (const key in filters) {
+  //  处理时间
+  Vue.filter(key, filters[key])
+}
+
+for (let key in directives) {
+  Vue.directive(key, directives[key])
+}
+
+
+// console.log(directives)
+import components from './components'
+Vue.use(components)
 
 // mock假数据
 if (process.env.NODE_ENV === 'production') {
@@ -37,9 +51,6 @@ Vue.config.productionTip = false
 // 参数1: 自定义指令的名字: 不需要+v-
 // 参数2: 是配置对象
 
-for (let key in directives) {
-  Vue.directive(key, directives[key])
-}
 
 new Vue({
   el: '#app',

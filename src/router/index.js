@@ -8,6 +8,7 @@ import permission from './modules/permission'
 import salarys from './modules/salarys'
 import setting from './modules/setting'
 import social from './modules/social'
+import imports from './modules/import'
 
 Vue.use(Router)
 
@@ -56,6 +57,7 @@ const asyncRoutes = [
   salarys,
   setting,
   social,
+  imports
 ]
 
 const createRouter = () =>
