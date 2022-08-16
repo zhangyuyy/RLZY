@@ -33,7 +33,8 @@
             :key="item.id"
             :label="item.value"
             :value="item.id"
-          ></el-option>
+          >
+          </el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="工号" prop="workNumber">
@@ -55,11 +56,11 @@
           placeholder="请选择部门"
           ref="deptSelect"
         >
-          <el-option v-loading="isTreeLoading" value="" class="treeOption">
+          <el-option class="treeOption" v-loading="isTreeLoading" value="">
             <el-tree
               @node-click="treeNodeClick"
               :data="depts"
-              :props="treeprops"
+              :props="treeProps"
             ></el-tree>
           </el-option>
         </el-select>
@@ -73,24 +74,21 @@
       </el-form-item>
     </el-form>
     <span slot="footer" class="dialog-footer">
-      <el-button @click="$emit('update:visible', false)">取 消</el-button>
-      <el-button type="primary" @click="onSave">确 定</el-button>
+      <el-button @click="onClose">取 消</el-button>
+      <el-button @click="onSave" type="primary">确 定</el-button>
     </span>
   </el-dialog>
 </template>
+
 <script>
 import employees from '@/constant/employees'
-const { hireType } = employees
 import { getDeptsApi } from '@/api/departments'
-import { transListToTree } from '@/utils/index.js'
+import { transListToTree } from '@/utils'
 import { addEmployee } from '@/api/employees'
+const { hireType } = employees
 export default {
   data() {
     return {
-      // 表单数据
-      treeData: [], // 定义数组接收树形数据
-      showTree: false, // 控制树形的显示或者隐藏
-      loading: false, // 控制树的显示或者隐藏进度条
       formData: {
         username: '',
         mobile: '',
@@ -98,7 +96,7 @@ export default {
         workNumber: '',
         departmentName: '',
         timeOfEntry: '',
-        correctionTime: ''
+        correctionTime: '',
       },
       rules: {
         username: [
@@ -106,47 +104,52 @@ export default {
           {
             min: 1,
             max: 4,
-            message: '用户姓名为1-4位'
-          }
+            message: '用户姓名为1-4位',
+          },
         ],
         mobile: [
           { required: true, message: '手机号不能为空', trigger: 'blur' },
           {
             pattern: /^1[3-9]\d{9}$/,
             message: '手机号格式不正确',
-            trigger: 'blur'
-          }
+            trigger: 'blur',
+          },
         ],
         formOfEmployment: [
-          { required: true, message: '聘用形式不能为空', trigger: 'change' }
+          { required: true, message: '聘用形式不能为空', trigger: 'change' },
         ],
         workNumber: [
-          { required: true, message: '工号不能为空', trigger: 'blur' }
+          { required: true, message: '工号不能为空', trigger: 'blur' },
         ],
         departmentName: [
-          { required: true, message: '部门不能为空', trigger: 'change' }
+          { required: true, message: '部门不能为空', trigger: 'blur' },
         ],
-        timeOfEntry: [{ required: true, message: '入职时间', trigger: 'blur' }]
+        timeOfEntry: [
+          { required: true, message: '入职时间', trigger: 'change' },
+        ],
       },
       hireType,
       depts: [],
-      treeprops: {
-        label: 'name'
+      treeProps: {
+        label: 'name',
       },
-      isTreeLoading: false
+      isTreeLoading: false,
     }
   },
+
   props: {
     visible: {
       type: Boolean,
-      required: true
-    }
+      required: true,
+    },
   },
-  components: {},
+
+  created() {},
+
   methods: {
     onClose() {
-      this.$refs.form.resetFields()
       this.$emit('update:visible', false)
+      this.$refs.form.resetFields()
     },
     async getDepts() {
       this.isTreeLoading = true
@@ -156,38 +159,30 @@ export default {
       this.isTreeLoading = false
     },
     treeNodeClick(row) {
-      // 把值赋值给输入框
+      // console.log(row)
       this.formData.departmentName = row.name
       this.$refs.deptSelect.blur()
     },
     onSave() {
-      // 校验是否通过
       this.$refs.form.validate(async (valid) => {
         if (!valid) return
-        // 通过发请求添加
         await addEmployee(this.formData)
         this.$message.success('添加成功')
-        // 调用关闭弹框
         this.onClose()
-        // 调用父组件里的方法重新渲染页面
         this.$emit('add-success')
       })
-    }
+    },
   },
-  created() {},
-  updated() {},
-  mounted() {},
-  filters: {},
-  computed: {},
-  watch: {}
 }
 </script>
-<style lang="scss" scoped>
+
+<style scoped lang="scss">
 .el-select-dropdown__item.hover,
-.el-select-dropdown__item:hover {
+.el-select-dropdown__item:hover .el-select-dropdown__item {
   background-color: #fff;
   overflow: unset;
 }
+
 .treeOption {
   height: 100px;
 }

@@ -13,27 +13,28 @@
           <el-button size="small" type="danger" @click="exportExcel"
             >导出</el-button
           >
-          <el-button size="small" type="primary" @click="addShow"
+          <el-button size="small" type="primary" @click="showAdd"
             >新增员工</el-button
           >
         </template>
       </page-tools>
       <!-- 放置表格和分页 -->
       <el-card>
-        <el-table border :data="employees">
+        <el-table :data="employees">
           <el-table-column label="序号" sortable="" type="index" />
           <el-table-column label="姓名" sortable="" prop="username" />
           <el-table-column label="员工">
             <template slot-scope="{ row }">
               <img
                 v-imgError="require('@/assets/common/head.jpg')"
-                :src="row.staffphoto"
+                :src="row.staffPhoto"
                 style="
                   border-radius: 50%;
                   width: 100px;
                   height: 100px;
                   padding: 10px;
                 "
+                @click="showErCodeDialog(row.staffPhoto)"
               />
             </template>
           </el-table-column>
@@ -43,15 +44,11 @@
             sortable=""
             :formatter="formatFormOfEmployment"
             prop="formOfEmployment"
-          />
-          <el-table-column label="部门" sortable="" prop="departmentName" />
-          <el-table-column
-            label="入职时间"
-            sortable=""
-            prop="timeOfEntry"
-            width="100"
           >
-            <!-- 使用时间格式化 -->
+          </el-table-column>
+          <el-table-column label="部门" sortable="" prop="departmentName" />
+          <el-table-column label="入职时间" sortable="">
+            <!-- 为什么这个位置用过滤器,格式化时间不只局限于表格 此时建议使用过滤器 -->
             <template slot-scope="{ row }">
               {{ row.timeOfEntry | formatTime }}
             </template>
@@ -68,15 +65,17 @@
           </el-table-column>
           <el-table-column label="操作" sortable="" fixed="right" width="280">
             <template slot-scope="{ row }">
-              <el-button type="text" size="small">查看</el-button>
+              <el-button
+                type="text"
+                size="small"
+                @click="$router.push('/employees/detail/' + row.id)"
+                >查看</el-button
+              >
               <el-button type="text" size="small">转正</el-button>
               <el-button type="text" size="small">调岗</el-button>
               <el-button type="text" size="small">离职</el-button>
               <el-button type="text" size="small">角色</el-button>
-              <el-button
-                type="text"
-                size="small"
-                @click="deleteEmployee(row.id)"
+              <el-button type="text" size="small" @click="onRemove(row.id)"
                 >删除</el-button
               >
             </template>
@@ -90,25 +89,33 @@
           style="height: 60px"
         >
           <el-pagination
-            layout="prev, pager, next"
-            :total="total"
             :page-size="pages.size"
+            :total="total"
             @current-change="currentChange"
+            layout="prev, pager, next"
           />
         </el-row>
       </el-card>
     </div>
+
+    <!-- 添加员工组件 -->
     <add-employees
-      @add-success="getEmployeesInfo"
+      @add-success="getEmployeesList"
       :visible.sync="showAddEmployees"
     />
+
+    <!-- 头像二维码 -->
+    <el-dialog title="头像二维码" :visible.sync="ercodeDialog">
+      <canvas id="canvas"></canvas>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { getEmployeesInfoApi, delEmployee } from '@/api/employees'
 import employees from '@/constant/employees'
-import addEmployees from './components/addEmployees.vue'
+import AddEmployees from './components/add-employees.vue'
+import QRcode from 'qrcode'
 const { exportExcelMapPath, hireType } = employees
 export default {
   name: 'Employees',
@@ -118,52 +125,51 @@ export default {
       total: 0,
       pages: {
         page: 1,
-        size: 5
+        size: 5,
       },
-      showAddEmployees: false
+      showAddEmployees: false,
+      ercodeDialog: false,
     }
   },
 
   created() {
-    this.getEmployeesInfo()
+    this.getEmployeesList()
   },
+
   components: {
-    addEmployees
+    AddEmployees,
   },
 
   methods: {
-    async getEmployeesInfo() {
+    async getEmployeesList() {
       const { rows, total } = await getEmployeesInfoApi(this.pages)
-      this.total = total
       this.employees = rows
+      this.total = total
     },
     currentChange(val) {
       this.pages.page = val
-      this.getEmployeesInfo()
+      this.getEmployeesList()
     },
     formatFormOfEmployment(row, column, cellValue, index) {
-      // 映射区判断
       const findItem = employees.hireType.find((item) => item.id === cellValue)
       return findItem ? findItem.value : '未知'
     },
-    // 删除员工
-    async deleteEmployee(id) {
-      await this.$confirm('是否删除吗')
+    async onRemove(id) {
+      await this.$confirm('是否删除该员工?')
       await delEmployee(id)
       this.$message.success('删除成功')
-      this.getEmployeesInfo()
+      this.getEmployeesList()
     },
-    // 点击熙增显示坦诚
-    addShow() {
+    showAdd() {
       this.showAddEmployees = true
     },
     async exportExcel() {
       const { export_json_to_excel } = await import('@/vendor/Export2Excel')
       const { rows } = await getEmployeesInfoApi({
         page: 1,
-        size: this.total
+        size: this.total,
       })
-      // 表头数据
+      // 表头数据 ['手机号', '姓名',...]
       const header = Object.keys(exportExcelMapPath)
       // data数据
       const data = rows.map((item) => {
@@ -183,10 +189,22 @@ export default {
         data, //具体数据 必填
         filename: '员工列表', //非必填
         autoWidth: true, //非必填
-        bookType: 'xlsx' //非必填
+        bookType: 'xlsx', //非必填
+        multiHeader: [['手机号', '其他信息', '', '', '', '', '部门']],
+        merges: ['A1:A2', 'B1:F1', 'G1:G2'],
       })
-    }
-  }
+    },
+    // 点击显示二维码弹层
+    showErCodeDialog(staffPhoto) {
+      if (!staffPhoto) return this.$message.error('该用户还未设置头像')
+      this.ercodeDialog = true
+
+      this.$nextTick(() => {
+        const canvas = document.getElementById('canvas')
+        QRcode.toCanvas(canvas, staffPhoto)
+      })
+    },
+  },
 }
 </script>
 

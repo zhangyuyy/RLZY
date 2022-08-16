@@ -12,13 +12,9 @@ export default {
     return {}
   },
 
-  created() {
-    
-  },
+  created() {},
 
-  methods: {
-   
-  }
+  methods: {}
 }
 </script>
 
