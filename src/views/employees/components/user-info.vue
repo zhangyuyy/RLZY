@@ -1,5 +1,9 @@
 <template>
   <div class="user-info">
+    <i
+      @click="$router.push(`/employees/print/${userId}?type=personal`)"
+      class="el-icon-printer"
+    ></i>
     <!-- 个人信息 -->
     <el-form label-width="220px">
       <!-- 工号 入职时间 -->
@@ -463,8 +467,8 @@ export default {
         resume: '', // 简历
         isThereAnyCompetitionRestriction: '', // 有无竞业限制
         proofOfDepartureOfFormerCompany: '', // 前公司离职证明
-        remarks: '', // 备注
-      },
+        remarks: '' // 备注
+      }
     }
   },
   created() {
@@ -475,13 +479,13 @@ export default {
     async loadUserDetail() {
       this.userInfo = await getUserDetail(this.userId)
       this.$refs.headerImg.fileList.push({
-        url: this.userInfo.staffPhoto,
+        url: this.userInfo.staffPhoto
       })
     },
     async loadEmployeesInfo() {
       this.formData = await getPersonalDetail(this.userId)
       this.$refs.employeesPic.fileList.push({
-        url: this.formData.staffPhoto,
+        url: this.formData.staffPhoto
       })
     },
     async onSaveUserDetail() {
@@ -506,8 +510,8 @@ export default {
     // 监听员工照片上传成功
     employeesPicSuccess({ url }) {
       this.formData.staffPhoto = url
-    },
-  },
+    }
+  }
 }
 </script>
 
