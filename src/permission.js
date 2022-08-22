@@ -14,7 +14,11 @@ router.beforeEach(async (to, from, next) => {
   if (token) {
     if (!store.state.user.userInfo.userId) {
       // 获取用户信息
-      await store.dispatch('user/getUserInfo')
+      const { roles } = await store.dispatch('user/getUserInfo')
+      console.log(roles);
+      await store.dispatch('permission/filterRoutes', roles)
+      await store.dispatch('permission/setpoionsAction', roles.points)
+      next(to.path)
     }
 
     // 1. 登录

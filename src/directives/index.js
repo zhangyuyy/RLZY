@@ -1,3 +1,5 @@
+import store from "@/store"
+
 // 定义自定义指令
 export const imgError = {
   // 当被绑定的元素插入到 DOM 中时……
@@ -22,4 +24,14 @@ export const imgError = {
       }
     }
   },
+
+}
+export const isHash = {
+  inserted(el, binding) {
+    const has = store.state.permission.points.includes(binding.value)
+    if (!has) {
+      el.remove()
+    }
+  }
+
 }
