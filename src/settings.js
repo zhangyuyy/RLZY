@@ -1,6 +1,5 @@
 module.exports = {
-  // 网站标题
-  title: 'Vue Admin Template',
+  title: 'hrsaas',
 
   /**
    * @type {boolean} true | false
@@ -12,6 +11,5 @@ module.exports = {
    * @type {boolean} true | false
    * @description Whether show the logo in sidebar
    */
-  // logo显示
-  sidebarLogo: true
+  sidebarLogo: true,
 }

@@ -4,6 +4,7 @@
 @import './element-ui.scss';
 @import './sidebar.scss';
 @import './common.scss';
+
 body {
   height: 100%;
   -moz-osx-font-smoothing: grayscale;
@@ -63,4 +64,10 @@ div:focus {
 // main-container global css
 .app-container {
   padding: 20px;
+}
+.tags-view-container
+  .tags-view-wrapper
+  .tags-view-item.active[data-v-fac8ca64] {
+  background-color: pink !important;
+  border-color: pink !important;
 }
