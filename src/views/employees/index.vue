@@ -8,18 +8,17 @@
             size="small"
             type="warning"
             @click="$router.push('/import')"
-            v-isHash="point.employees.import"
-          
+            v-isHas="point.employees.import"
             >导入</el-button
           >
           <el-button size="small" type="danger" @click="exportExcel"
             >导出</el-button
           >
           <el-button
+            v-if="isHas(point.employees)"
             size="small"
             type="primary"
             @click="showAdd"
-            v-if="isHas(point.employees.add)"
             >新增员工</el-button
           >
         </template>
@@ -87,10 +86,17 @@
                 >角色</el-button
               >
               <el-button
+                v-if="isHas(point.employees.add)"
+                size="small"
+                type="primary"
+                @click="showAdd"
+                >新增员工</el-button
+              >
+              <el-button
                 type="text"
                 size="small"
                 @click="onRemove(row.id)"
-                :disabled="!isHas(point.employees.del)"
+                v-if="isHas(point.employees.del)"
                 >删除</el-button
               >
             </template>
@@ -123,11 +129,12 @@
     <el-dialog title="头像二维码" :visible.sync="ercodeDialog">
       <canvas id="canvas"></canvas>
     </el-dialog>
-    <!-- 弹层 -->
-    <AssiGnrole
+
+    <!-- 分配角色 -->
+    <assign-role
+      :employeesId="currentEmployeesId"
       :visible.sync="showAssignRole"
-      :employeesId="currentEployeesId"
-    ></AssiGnrole>
+    />
   </div>
 </template>
 
@@ -135,13 +142,10 @@
 import { getEmployeesInfoApi, delEmployee } from '@/api/employees'
 import employees from '@/constant/employees'
 import AddEmployees from './components/add-employees.vue'
+import AssignRole from './components/assign-role.vue'
 import QRcode from 'qrcode'
+import MixinPermission from '@/mixins/permission'
 const { exportExcelMapPath, hireType } = employees
-import AssiGnrole from './components/assign-role.vue'
-import permission from '@/constant/permission'
-
-import MixinPermission from '@/mixins/permissions'
-
 export default {
   name: 'Employees',
   mixins: [MixinPermission],
@@ -151,13 +155,12 @@ export default {
       total: 0,
       pages: {
         page: 1,
-        size: 5
+        size: 5,
       },
       showAddEmployees: false,
       ercodeDialog: false,
       showAssignRole: false,
-      currentEployeesId: '',
-      point: permission
+      currentEmployeesId: '',
     }
   },
 
@@ -167,7 +170,7 @@ export default {
 
   components: {
     AddEmployees,
-    AssiGnrole
+    AssignRole,
   },
 
   methods: {
@@ -197,7 +200,7 @@ export default {
       const { export_json_to_excel } = await import('@/vendor/Export2Excel')
       const { rows } = await getEmployeesInfoApi({
         page: 1,
-        size: this.total
+        size: this.total,
       })
       // 表头数据 ['手机号', '姓名',...]
       const header = Object.keys(exportExcelMapPath)
@@ -221,7 +224,7 @@ export default {
         autoWidth: true, //非必填
         bookType: 'xlsx', //非必填
         multiHeader: [['手机号', '其他信息', '', '', '', '', '部门']],
-        merges: ['A1:A2', 'B1:F1', 'G1:G2']
+        merges: ['A1:A2', 'B1:F1', 'G1:G2'],
       })
     },
     // 点击显示二维码弹层
@@ -234,12 +237,12 @@ export default {
         QRcode.toCanvas(canvas, staffPhoto)
       })
     },
-    // 点击分配角色
+    // 点击角色显示分配角色弹层
     showAssignDialog(id) {
       this.showAssignRole = true
-      this.currentEployeesId = id
-    }
-  }
+      this.currentEmployeesId = id
+    },
+  },
 }
 </script>
 

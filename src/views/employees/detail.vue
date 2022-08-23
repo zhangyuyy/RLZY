@@ -27,8 +27,9 @@
           <el-tab-pane name="user" label="个人详情">
             <user-info />
           </el-tab-pane>
-          <el-tab-pane name="job" label="岗位信息" />
-          <jobinfo></jobinfo>
+          <el-tab-pane name="job" label="岗位信息">
+            <JobInfo />
+          </el-tab-pane>
         </el-tabs>
       </el-card>
     </div>
@@ -38,23 +39,31 @@
 <script>
 import { getUserDetail, saveUserDetailById } from '@/api/user.js'
 import UserInfo from './components/user-info.vue'
+import JobInfo from './components/job-info.vue'
 import Cookies from 'js-cookie'
-import jobinfo from './components/job-info.vue'
 export default {
   data() {
     return {
       formData: {},
-      activeName: Cookies.get('employeeDetailTab') || 'account'
+      activeName: Cookies.get('employeeDetailTab') || 'account',
     }
+  },
+  // 路由开启props,此时可以接收路由参数
+  props: {
+    id: {
+      required: true,
+      type: String,
+    },
   },
 
   components: {
     UserInfo,
-    jobinfo
+    JobInfo,
   },
 
   created() {
     this.loadUserDetail()
+    // console.log(this.$attrs)
   },
 
   methods: {
@@ -68,8 +77,8 @@ export default {
     },
     handleTabClick() {
       Cookies.set('employeeDetailTab', this.activeName)
-    }
-  }
+    },
+  },
 }
 </script>
 

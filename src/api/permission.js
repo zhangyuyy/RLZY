@@ -1,26 +1,26 @@
-// 获取权限
 import request from '@/utils/request'
-export function getPermissionList(params) {
-    return request({
-        url: '/sys/permission',
-        params
-    })
+
+// 获取权限
+export function getPermissionList() {
+  return request({
+    url: '/sys/permission',
+  })
 }
+
 /**
- * 添加权限
- * enVisible	string	非必须			
-  name	string	非必须			
-  code	string	非必须			
-   description	string	非必须			
-   type	number	非必须			
-    pid	string	非必须			
- * @param {*} data 
- * @returns 
+ * @params {Object} data 
+enVisible	string	非必须			
+name	string	非必须			
+code	string	非必须			
+description	string	非必须			
+type	number	非必须			
+pid
+ * @returns promise
  */
 export function addPermission(data) {
-    return request({
-        url: '/sys/permission',
-        method: 'post',
-        data
-    })
+  return request({
+    url: '/sys/permission',
+    method: 'POST',
+    data,
+  })
 }

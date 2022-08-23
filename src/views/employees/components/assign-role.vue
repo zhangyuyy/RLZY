@@ -1,7 +1,10 @@
 <template>
   <el-dialog @open="onOpen" @close="close" title="分配角色" :visible="visible">
     <el-checkbox-group v-model="checkList">
+      <!-- label: 渲染 name -->
+      <!-- 会记录选中值 id -->
       <el-checkbox v-for="item in roles" :key="item.id" :label="item.id">
+        <!-- 插槽也可以用于渲染 -->
         {{ item.name }}
       </el-checkbox>
     </el-checkbox-group>
@@ -11,74 +14,64 @@
     </span>
   </el-dialog>
 </template>
+
 <script>
 import { getRolesApi } from '@/api/role'
-import { getUserDetail } from '@/api/user' //根据用户id获取员工详情数据
+import { getUserDetail } from '@/api/user'
 import { assignRoles } from '@/api/employees'
-
 export default {
-  name: 'assign',
   data() {
     return {
-      checkList: [], //复选框选中状态
-      roles: [] //员工列表
+      checkList: [], // 记录选中的角色
+      roles: [],
     }
   },
+
   props: {
     visible: {
       type: Boolean,
-      required: true
+      required: true,
     },
-    // 父组件传来的id
     employeesId: {
       type: String,
-      required: true
-    }
+      required: true,
+    },
   },
-  components: {},
-  //   获取角色列表
+
+  created() {},
+
   methods: {
     close() {
       this.$emit('update:visible', false)
     },
     // 获取角色列表
     async getRolesList() {
-      const roles = await getRolesApi()
-      // console.log(roles)
-      this.roles = roles.rows
+      const { rows } = await getRolesApi()
+      this.roles = rows
     },
+    // 监听对话框打开
     onOpen() {
       this.getRolesList()
       this.getEmployeesRoles()
     },
     // 获取员工角色
     async getEmployeesRoles() {
-      // 需要传入父组件里的id
-      // console.log(this.employeesId);
+      // console.log()
       const { roleIds } = await getUserDetail(this.employeesId)
-      // console.log(roleIds)
       this.checkList = roleIds
     },
+    // 分配角色
     async assignRole() {
       if (!this.checkList.length) return this.$message.error('请选择角色')
-      // 接口需要传入角色id，和父组件传来的id
       await assignRoles({
         id: this.employeesId,
-        roleIds: this.checkList
+        roleIds: this.checkList,
       })
-      // 成功提示语
       this.$message.success('分配成功')
-      // 调用关闭弹层接口
       this.close()
-    }
+    },
   },
-
-  created() {},
-  updated() {},
-  mounted() {},
-  filters: {},
-  computed: {},
-  watch: {}
 }
 </script>
-<style lang="less" scoped></style>
+
+<style scoped lang="less"></style>

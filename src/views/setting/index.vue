@@ -4,9 +4,9 @@
       <el-tabs v-model="activeName">
         <el-tab-pane label="角色管理" name="first">
           <el-button
+            v-if="isHas(point.roles.add)"
             @click="addDialogVisible = true"
             type="primary"
-            v-if="isHas(point.roles.add)"
             >新增角色</el-button
           >
           <!-- 表格 -->
@@ -96,7 +96,8 @@
         <el-button @click="onAddRole" type="primary">确 定</el-button>
       </span>
     </el-dialog>
-    <!-- 分配权限对话框 -->
+
+    <!-- 给角色分配权限 -->
     <el-dialog
       title="给角色分配权限"
       :visible.sync="setRightsDialog"
@@ -108,7 +109,6 @@
         default-expand-all
         show-checkbox
         node-key="id"
-        v-if="setRightsDialog"
         :data="permissions"
         :default-checked-keys="defaultCheckKeys"
         :props="{ label: 'name' }"
@@ -128,14 +128,13 @@ import {
   addRoleApi,
   removeRoleApi,
   getRolesInfo,
-  assignPerm
+  assignPerm,
 } from '@/api/role.js'
 import { getCompanyInfoApi } from '@/api/setting.js'
 import { getPermissionList } from '@/api/permission'
 import { transListToTree } from '@/utils'
-import MixinPermission from '@/mixins/permissions'
+import MixinPermission from '@/mixins/permission'
 export default {
-  mixins: [MixinPermission],
   data() {
     return {
       activeName: 'first',
@@ -146,30 +145,33 @@ export default {
       addDialogVisible: false,
       addRoleForm: {
         name: '', // 部门名称
-        region: ''
+        region: '',
       },
       addRoleFormRules: {
-        name: [{ required: true, message: '请填写部门名称', trigger: 'blur' }]
+        name: [{ required: true, message: '请填写部门名称', trigger: 'blur' }],
       },
       companyInfo: {},
       setRightsDialog: false,
-      permissions: [],
-      defaultCheckKeys: ['1', '1063315016368918528'],
-      roleId: ''
+      permissions: [], // 权限树形数据
+      defaultCheckKeys: [], // 分配权限选中项
+      roleId: '',
     }
   },
+
+  // 混入
+  mixins: [MixinPermission],
 
   created() {
     this.getRoles()
     this.getCompanyInfo()
-    this.getpermissions()
+    this.getPermissions()
   },
 
   methods: {
     async getRoles() {
       const { rows, total } = await getRolesApi({
         page: this.page,
-        pagesize: this.pageSize
+        pagesize: this.pageSize,
       })
       this.tableData = rows
       this.total = total
@@ -211,38 +213,35 @@ export default {
       // console.log(res)
       this.companyInfo = res
     },
-    // 点击让弹层显示
+    // 点击分配权限显示对话框
     async showRightsDialog(id) {
       this.roleId = id
       this.setRightsDialog = true
-      // 拿到角色Id 根据ID获取详情
       const res = await getRolesInfo(id)
-      console.log(res.permIds)
+      // console.log()
       this.defaultCheckKeys = res.permIds
     },
     // 获取权限列表
-    async getpermissions() {
+    async getPermissions() {
       const res = await getPermissionList()
-
-      const treepermission = transListToTree(res, '0')
-      this.permissions = treepermission
-      // console.log(res)
+      const treePermission = transListToTree(res, '0')
+      this.permissions = treePermission
     },
+    // 监听设置权限对话框关闭
     setRightsClose() {
-      // 让树形结构内容清空
+      // console.log(123)
       this.defaultCheckKeys = []
     },
-    // 点击确定
+    // 保存权限分配
     async onSaveRights() {
-      // console.log(this.roleId);
       await assignPerm({
-        id: this.roleId, //权限ID
-        permIds: this.$refs.perTree.getCheckedKeys()
+        id: this.roleId,
+        permIds: this.$refs.perTree.getCheckedKeys(),
       })
       this.$message.success('分配成功')
       this.setRightsDialog = false
-    }
-  }
+    },
+  },
 }
 </script>
 

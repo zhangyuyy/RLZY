@@ -28,6 +28,8 @@ export default {
       const userBaseInfo = await getUserInfoApi()
       const userInfo = await getUserDetail(userBaseInfo.userId)
       context.commit('setUserInfo', { ...userBaseInfo, ...userInfo })
+      // 在这里通过userBaseInfo 处理动态路由
+      // actions 内部可以通过return将数据传递出去, 类似then中的return
       return userBaseInfo
     },
     // 退出
@@ -35,7 +37,7 @@ export default {
       context.commit('setToken', '')
       context.commit('setUserInfo', {})
       resetRouter()
-      // 
+      // {root: true} context 相当于全局的context
       context.commit('permission/setRoutes', [], { root: true })
     },
   },

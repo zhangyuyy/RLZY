@@ -21,9 +21,13 @@ import * as directives from '@/directives'
 import components from '@/components'
 // 过滤器封装
 import * as filters from '@/filters'
-// 打印机
 import Print from 'vue-print-nb'
-Vue.use(Print);
+// console.log(Print)
+Vue.use(Print)
+// 语言国际化
+import i18n from '@/i18n'
+
+
 
 // 统一注册过滤器
 for (let key in filters) {
@@ -43,7 +47,11 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // 注册element ui
-Vue.use(ElementUI, { locale })
+
+Vue.use(ElementUI, {
+  i18n: (key, value) => i18n.t(key, value)
+})
+
 // 如果想要中文版 element-ui，按如下方式声明
 // Vue.use(ElementUI)
 
@@ -58,5 +66,6 @@ new Vue({
   el: '#app',
   router,
   store,
+  i18n,
   render: (h) => h(App),
 })
